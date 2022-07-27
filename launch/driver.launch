@@ -1,0 +1,10 @@
+<launch>
+  <arg name="host" default="192.168.11.11"/>
+  <arg name="port" default="1445"/>
+
+  <node name="laser_driver" type="laser_driver" pkg="rpad_ros">
+    <param name="host" value="$(arg host)"/>
+    <param name="port" value="$(arg port)"/>
+  </node>
+
+</launch>
