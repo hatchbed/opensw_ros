@@ -72,6 +72,14 @@ int main(int argc, char **argv)
         msg->orientation.y = imu_data->orientation.y();
         msg->orientation.z = imu_data->orientation.z();
 
+        msg->angular_velocity.x = imu_data->angular_rate.x();
+        msg->angular_velocity.y = imu_data->angular_rate.y();
+        msg->angular_velocity.z = imu_data->angular_rate.z();
+
+        msg->linear_acceleration.x = imu_data->acceleration.x();
+        msg->linear_acceleration.y = imu_data->acceleration.y();
+        msg->linear_acceleration.z = imu_data->acceleration.z();
+
         imu_pub.publish(msg);
         spin_rate.sleep();
     }
