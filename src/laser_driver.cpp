@@ -6,13 +6,13 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "rpad_driver");
+    ros::init(argc, argv, "rpad_laser_driver");
     ros::NodeHandle node;
     ros::NodeHandle priv("~");
 
     rpad_ros::LogBridge log_bridge("rpad", node);
 
-    ROS_INFO("Initializing rpad driver ...");
+    ROS_INFO("Initializing rpad laser driver ...");
 
     std::string host = priv.param("host", std::string("192.168.11.11"));
     ROS_INFO("  host: %s", host.c_str());

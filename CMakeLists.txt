@@ -18,11 +18,15 @@ include_directories(
 
 catkin_package()
 
+add_executable(imu_driver src/imu_driver.cpp src/logger.cpp)
+target_link_libraries(imu_driver ${catkin_LIBRARIES} ${rpad_LIBRARIES})
+set_property(TARGET imu_driver PROPERTY CXX_STANDARD 17)
+
 add_executable(laser_driver src/laser_driver.cpp src/logger.cpp)
 target_link_libraries(laser_driver ${catkin_LIBRARIES} ${rpad_LIBRARIES})
 set_property(TARGET laser_driver PROPERTY CXX_STANDARD 17)
 
-install(TARGETS laser_driver
+install(TARGETS imu_driver laser_driver
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
