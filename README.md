@@ -14,13 +14,13 @@ The `imu_driver` node publishes the IMU data from a SlamWare device.
 
 ### Subscribed topics
 
-# Published topics
+### Published topics
 
 | Topic  | Type | Description | 
 |-----|----|----|
 | **imu** | `sensor_msgs/Imu` | IMU sensor data |
 
-# Parameters
+### Parameters
 
 | Name  | Type | Description | Default |
 |----|----|----|----|
@@ -36,13 +36,13 @@ The `laser_driver` node publishes the laser scan data from a SlamWare device.
 
 ### Subscribed topics
 
-# Published topics
+### Published topics
 
 | Topic  | Type | Description | 
 |-----|----|----|
 | **scan** | `sensor_msgs/Scan` | Laser scan sensor data |
 
-# Parameters
+### Parameters
 
 | Name  | Type | Description | Default |
 |----|----|----|----|
