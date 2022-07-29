@@ -28,7 +28,7 @@ The `imu_driver` node publishes the IMU data from a SlamWare device.
 | **frame_id** | `string` | Frame to use for the published message | "imu" |
 | **port**| `int` | TCP port to connect to | `1445` |
 | **rate**| `double` | Publish rate | `50.0` |
-| **use_raw_data**| `bool` | Use raw data fields | `50.0` |
+| **use_raw_data**| `bool` | Use raw data fields | `true` |
 
 ## Laser Driver
 
