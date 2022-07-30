@@ -29,50 +29,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <chrono>
+
+#include <rclcpp/rclcpp.hpp>
 #include <rpad/client.h>
 #include <rpad_ros/logger.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
+#include <rpad_ros/params.h>
+#include <sensor_msgs/msg/imu.hpp>
+
+using namespace std::chrono_literals;
+using namespace rpad_ros;
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "rpad_imu_driver");
-    ros::NodeHandle node;
-    ros::NodeHandle priv("~");
+    auto node = std::make_shared<rclcpp::Node>("rpad_imu_driver");
 
-    rpad_ros::LogBridge log_bridge("rpad", node);
+    LogBridge log_bridge("rpad", node);
 
-    ROS_INFO("Initializing rpad imu driver ...");
+    RCLCPP_INFO(node->get_logger(),"Initializing rpad imu driver ...");
 
-    std::string host = priv.param("host", std::string("192.168.11.11"));
-    ROS_INFO("  host: %s", host.c_str());
+    std::string host = param(node, "host", std::string("192.168.11.11"), "Host to connect to");
+    RCLCPP_INFO(node->get_logger(),"  host: %s", host.c_str());
 
-    int port = priv.param("port", 1445);
-    ROS_INFO("  port: %d", port);
+    int port = param(node, "port", 1445, "TCP port to connect to");
+    RCLCPP_INFO(node->get_logger(),"  port: %d", port);
 
-    std::string frame_id = priv.param("frame_id", std::string("imu"));
-    ROS_INFO("  frame_id: %s", frame_id.c_str());
+    std::string frame_id = param(node, "frame_id", std::string("imu"), "Frame to use for the published messages");
+    RCLCPP_INFO(node->get_logger(),"  frame_id: %s", frame_id.c_str());
 
-    bool use_raw_data = priv.param("use_raw_data", true);
-    ROS_INFO("  use_raw_data: %s", (use_raw_data ? "true" : "false"));
+    bool use_raw_data = param(node, "use_raw_data", true, "Use raw data fields");
+    RCLCPP_INFO(node->get_logger(),"  use_raw_data: %s", (use_raw_data ? "true" : "false"));
 
-    float rate = priv.param("rate", 50.0);
-    ROS_INFO("  rate: %f", rate);
+    float rate = param(node, "rate", 50.0, "Publish rate");
+    RCLCPP_INFO(node->get_logger(),"  rate: %f", rate);
 
-    ros::Publisher imu_pub = node.advertise<sensor_msgs::Imu>("imu", 10);
+    auto imu_pub = node->create_publisher<sensor_msgs::msg::Imu>("imu", rclcpp::SensorDataQoS());
 
     rpad::Client client;
 
-    ros::Time last_stamp = ros::Time::now();
-    ros::Rate spin_rate(rate);
-    while (ros::ok()) {
-        ros::spinOnce();
+    rclcpp::Time last_stamp = node->now();
+    rclcpp::Rate spin_rate(rate);
+    while (rclcpp::ok()) {
+        rclcpp::spin_some(node);
 
         if (!client.connected()) {
-            ROS_INFO("Connecting to device ...");
+            RCLCPP_INFO(node->get_logger(),"Connecting to device ...");
             if (!client.connect(host, port, 500)) {
-                ROS_WARN("Failed to connect to device.");
-                ros::Duration(1.0).sleep();
+                RCLCPP_WARN(node->get_logger(),"Failed to connect to device.");
+                rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(1.0s));
                 continue;
             }
         }
@@ -86,31 +90,31 @@ int main(int argc, char **argv)
         }
 
         if (!imu_data) {
-            ROS_WARN("Failed to get imu data.  Disconnecting...");
+            RCLCPP_WARN(node->get_logger(),"Failed to get imu data.  Disconnecting...");
             client.disconnect();
             continue;
         }
 
-        ros::Time stamp = ros::Time::now();
+        rclcpp::Time stamp = node->now();
 
-        auto msg = boost::make_shared<sensor_msgs::Imu>();
-        msg->header.stamp = stamp;
-        msg->header.frame_id = frame_id;
+        sensor_msgs::msg::Imu msg;
+        msg.header.stamp = stamp;
+        msg.header.frame_id = frame_id;
 
-        msg->orientation.w = imu_data->orientation.w();
-        msg->orientation.x = imu_data->orientation.x();
-        msg->orientation.y = imu_data->orientation.y();
-        msg->orientation.z = imu_data->orientation.z();
+        msg.orientation.w = imu_data->orientation.w();
+        msg.orientation.x = imu_data->orientation.x();
+        msg.orientation.y = imu_data->orientation.y();
+        msg.orientation.z = imu_data->orientation.z();
 
-        msg->angular_velocity.x = imu_data->angular_rate.x();
-        msg->angular_velocity.y = imu_data->angular_rate.y();
-        msg->angular_velocity.z = imu_data->angular_rate.z();
+        msg.angular_velocity.x = imu_data->angular_rate.x();
+        msg.angular_velocity.y = imu_data->angular_rate.y();
+        msg.angular_velocity.z = imu_data->angular_rate.z();
 
-        msg->linear_acceleration.x = imu_data->acceleration.x();
-        msg->linear_acceleration.y = imu_data->acceleration.y();
-        msg->linear_acceleration.z = imu_data->acceleration.z();
+        msg.linear_acceleration.x = imu_data->acceleration.x();
+        msg.linear_acceleration.y = imu_data->acceleration.y();
+        msg.linear_acceleration.z = imu_data->acceleration.z();
 
-        imu_pub.publish(msg);
+        imu_pub->publish(msg);
         spin_rate.sleep();
     }
 

@@ -31,23 +31,21 @@
 
 #include <string>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rcutils/logging.h>
 
 namespace rpad_ros {
 
 class LogBridge {
 
     public:
-    LogBridge(const std::string& name, const ros::NodeHandle& node);
+    LogBridge(const std::string& name, rclcpp::Node::SharedPtr node);
 
     private:
-    void checkLogLevel(const ros::WallTimerEvent& e);
-
-    std::string name_;
     std::string full_name_;
-    ros::NodeHandle node_;
-    ros::WallTimer timer_;
-    ros::console::levels::Level log_level_ = ros::console::levels::Info;
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::TimerBase::SharedPtr timer_;
+    RCUTILS_LOG_SEVERITY log_level_ = RCUTILS_LOG_SEVERITY_INFO;
 };
 
 }  // namespace rpad_ros

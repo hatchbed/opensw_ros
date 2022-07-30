@@ -31,13 +31,13 @@
 
 #include <rpad_ros/logger.h>
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
-
-#include <ros/ros.h>
-
 #include <rpad/logger.h>
+
+using namespace std::chrono_literals;
 
 namespace spd = spdlog;
 
@@ -47,69 +47,74 @@ template<typename Mutex>
 class RosLogSink : public spdlog::sinks::base_sink <Mutex>
 {
     public:
-    RosLogSink(const std::string& name) : name_(name) {}
+    RosLogSink(const rclcpp::Logger& logger) : logger_(logger) {}
 
     protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
         if (msg.level == spdlog::level::info) {
-            ROS_INFO_STREAM_NAMED(name_, fmt::to_string(msg.payload));
+            RCLCPP_INFO_STREAM(logger_, fmt::to_string(msg.payload));
         }
         else if (msg.level == spdlog::level::warn) {
-            ROS_WARN_STREAM_NAMED(name_, fmt::to_string(msg.payload));
+            RCLCPP_WARN_STREAM(logger_, fmt::to_string(msg.payload));
         }
         else if (msg.level == spdlog::level::err) {
-            ROS_ERROR_STREAM_NAMED(name_, fmt::to_string(msg.payload));
+            RCLCPP_ERROR_STREAM(logger_, fmt::to_string(msg.payload));
         }
         else {
-            ROS_DEBUG_STREAM_NAMED(name_, fmt::to_string(msg.payload));
+            RCLCPP_DEBUG_STREAM(logger_, fmt::to_string(msg.payload));
         }
     }
 
     void flush_() override {}
 
-    std::string name_;
+    rclcpp::Logger logger_;
 };
 
-LogBridge::LogBridge(const std::string& name, const ros::NodeHandle& node) :
-    name_(name),
-    full_name_("ros.rpad_ros." + name_),
+LogBridge::LogBridge(const std::string& name, rclcpp::Node::SharedPtr node) :
     node_(node)
 {
-    spdlog::sink_ptr ros_sink = std::make_shared<RosLogSink<std::mutex>>(name_);
+    auto logger = node->get_logger().get_child(name);
+    full_name_ = logger.get_name();
+
+    spdlog::sink_ptr ros_sink = std::make_shared<RosLogSink<std::mutex>>(logger);
 
     spdlog::default_logger()->sinks().clear();
     spdlog::default_logger()->sinks().push_back(ros_sink);
     spdlog::set_pattern("%v");
-    ROS_INFO_STREAM_NAMED(name_, "Initialized log bridge");
-    ros::console::set_logger_level(full_name_, ros::console::levels::Info);
 
-    timer_ = node_.createWallTimer(ros::WallDuration(1.0), &LogBridge::checkLogLevel, this, false);
-}
-
-void LogBridge::checkLogLevel(const ros::WallTimerEvent& e) {
-    std::map<std::string, ros::console::levels::Level> loggers;
-    ros::console::get_loggers(loggers);
-    auto level = loggers[full_name_];
-    if (level != log_level_) {
-        log_level_ = level;
-
-        if (level == ros::console::levels::Info) {
-            spdlog::set_level(spdlog::level::info);
-        }
-        else if (level == ros::console::levels::Debug) {
-            spdlog::set_level(spdlog::level::debug);
-        }
-        else if (level == ros::console::levels::Warn) {
-            spdlog::set_level(spdlog::level::warn);
-        }
-        else if (level == ros::console::levels::Error) {
-            spdlog::set_level(spdlog::level::err);
-        }
-        else if (level == ros::console::levels::Fatal) {
-            spdlog::set_level(spdlog::level::err);
-        }
+    RCLCPP_INFO_STREAM(logger, "Initialized log bridge");
+    auto ret = rcutils_logging_set_logger_level(full_name_.c_str(), RCUTILS_LOG_SEVERITY_INFO);
+    if (ret != RCUTILS_RET_OK) {
+        RCLCPP_WARN_STREAM(logger, "Failed to set log level");
     }
+
+    timer_ = node_->create_wall_timer(1000ms, [&]()
+    {
+        auto level = rcutils_logging_get_logger_level(full_name_.c_str());
+        if (level != log_level_) {
+            if (level == RCUTILS_LOG_SEVERITY_INFO) {
+                log_level_ = RCUTILS_LOG_SEVERITY_INFO;
+                spdlog::set_level(spdlog::level::info);
+            }
+            else if (level == RCUTILS_LOG_SEVERITY_DEBUG) {
+                log_level_ = RCUTILS_LOG_SEVERITY_DEBUG;
+                spdlog::set_level(spdlog::level::debug);
+            }
+            else if (level == RCUTILS_LOG_SEVERITY_WARN) {
+                log_level_ = RCUTILS_LOG_SEVERITY_WARN;
+                spdlog::set_level(spdlog::level::warn);
+            }
+            else if (level == RCUTILS_LOG_SEVERITY_ERROR) {
+                log_level_ = RCUTILS_LOG_SEVERITY_ERROR;
+                spdlog::set_level(spdlog::level::err);
+            }
+            else if (level == RCUTILS_LOG_SEVERITY_FATAL) {
+                log_level_ = RCUTILS_LOG_SEVERITY_FATAL;
+                spdlog::set_level(spdlog::level::err);
+            }
+        }
+    });
 }
 
 }  // namespace rpad_ros

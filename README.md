@@ -25,7 +25,7 @@ The `imu_driver` node publishes the IMU data from a SlamWare device.
 | Name  | Type | Description | Default |
 |----|----|----|----|
 | **host**| `string` | Host to connect to | "192.168.11.11" |
-| **frame_id** | `string` | Frame to use for the published message | "imu" |
+| **frame_id** | `string` | Frame to use for the published messages | "imu" |
 | **port**| `int` | TCP port to connect to | `1445` |
 | **rate**| `double` | Publish rate | `50.0` |
 | **use_raw_data**| `bool` | Use raw data fields | `true` |
@@ -47,7 +47,7 @@ The `laser_driver` node publishes the laser scan data from a SlamWare device.
 | Name  | Type | Description | Default |
 |----|----|----|----|
 | **host**| `string` | Host to connect to | "192.168.11.11" |
-| **frame_id** | `string` | Frame to use for the published message | "laser" |
+| **frame_id** | `string` | Frame to use for the published messages | "laser" |
 | **max_range** | `double` | Max sensor range in meters | `40.0` |
 | **min_range** | `double` | Min sensor range in meters | `0.0` |
 | **port**| `int` | TCP port to connect to | `1445` |
