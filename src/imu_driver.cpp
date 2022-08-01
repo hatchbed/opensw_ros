@@ -31,10 +31,10 @@
 
 #include <chrono>
 
+#include <param_util/param_handler.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rpad/client.h>
 #include <rpad_ros/logger.h>
-#include <rpad_ros/params.h>
 #include <sensor_msgs/msg/imu.hpp>
 
 using namespace std::chrono_literals;
@@ -42,26 +42,23 @@ using namespace rpad_ros;
 
 int main(int argc, char **argv)
 {
+    rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("rpad_imu_driver");
-
-    LogBridge log_bridge("rpad", node);
 
     RCLCPP_INFO(node->get_logger(),"Initializing rpad imu driver ...");
 
-    std::string host = param(node, "host", std::string("192.168.11.11"), "Host to connect to");
-    RCLCPP_INFO(node->get_logger(),"  host: %s", host.c_str());
+    param_util::ParamHandler params(node);
+    params.register_verbose_logging_param();
 
-    int port = param(node, "port", 1445, "TCP port to connect to");
-    RCLCPP_INFO(node->get_logger(),"  port: %d", port);
+    // sink log messages from rpad into roslogs
+    LogBridge log_bridge("rpad", node);
 
-    std::string frame_id = param(node, "frame_id", std::string("imu"), "Frame to use for the published messages");
-    RCLCPP_INFO(node->get_logger(),"  frame_id: %s", frame_id.c_str());
-
-    bool use_raw_data = param(node, "use_raw_data", true, "Use raw data fields");
-    RCLCPP_INFO(node->get_logger(),"  use_raw_data: %s", (use_raw_data ? "true" : "false"));
-
-    float rate = param(node, "rate", 50.0, "Publish rate");
-    RCLCPP_INFO(node->get_logger(),"  rate: %f", rate);
+    // parameters
+    std::string host = params.param("host", std::string("192.168.11.11"), "Host to connect to");
+    int port = params.param("port", 1445, "TCP port to connect to");
+    std::string frame_id = params.param("frame_id", std::string("imu"), "Frame to use for the published messages");
+    bool use_raw_data = params.param("use_raw_data", true, "Use raw data fields");
+    float rate = params.param("rate", 50.0, "Publish rate");
 
     auto imu_pub = node->create_publisher<sensor_msgs::msg::Imu>("imu", rclcpp::SensorDataQoS());
 

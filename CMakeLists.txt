@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(rpad_ros VERSION 0.1.0)
 
 find_package(ament_cmake REQUIRED)
+find_package(param_util REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
@@ -17,12 +18,12 @@ include_directories(
 add_executable(imu_driver src/imu_driver.cpp src/logger.cpp)
 target_link_libraries(imu_driver ${rpad_LIBRARIES})
 set_property(TARGET imu_driver PROPERTY CXX_STANDARD 17)
-ament_target_dependencies(imu_driver rclcpp sensor_msgs)
+ament_target_dependencies(imu_driver param_util rclcpp sensor_msgs)
 
 add_executable(laser_driver src/laser_driver.cpp src/logger.cpp)
 target_link_libraries(laser_driver ${rpad_LIBRARIES})
 set_property(TARGET laser_driver PROPERTY CXX_STANDARD 17)
-ament_target_dependencies(laser_driver rclcpp sensor_msgs)
+ament_target_dependencies(laser_driver param_util rclcpp sensor_msgs)
 
 install(
   TARGETS 
