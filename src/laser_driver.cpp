@@ -31,10 +31,10 @@
 
 #include <chrono>
 
+#include <param_util/param_handler.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rpad/client.h>
 #include <rpad_ros/logger.h>
-#include <rpad_ros/params.h>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 using namespace std::chrono_literals;
@@ -42,29 +42,26 @@ using namespace rpad_ros;
 
 int main(int argc, char **argv)
 {
+    rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("rpad_laser_driver");
-
-    LogBridge log_bridge("rpad", node);
-
     RCLCPP_INFO(node->get_logger(), "Initializing rpad laser driver ...");
 
-    std::string host = param(node, "host", std::string("192.168.11.11"), "Host to connect to");
-    RCLCPP_INFO(node->get_logger(),"  host: %s", host.c_str());
+    param_util::ParamHandler params(node);
+    params.register_verbose_logging_param();
 
-    int port = param(node, "port", 1445, "TCP port to connect to");
-    RCLCPP_INFO(node->get_logger(),"  port: %d", port);
+    // sink log messages from rpad into roslogs
+    LogBridge log_bridge("rpad", node);
 
-    std::string frame_id = param(node, "frame_id", std::string("laser"), "Frame to use for the published messages");
-    RCLCPP_INFO(node->get_logger(),"  frame_id: %s", frame_id.c_str());
+    // parameters
+    std::string host = params.param("host", std::string("192.168.11.11"), "Host to connect to");
+    int port = params.param("port", 1445, "TCP port to connect to");
+    std::string frame_id = params.param("frame_id", std::string("imu"), "Frame to use for the published messages");
+    float rate = params.param("rate", 50.0, "Publish rate");
 
-    float min_range = param(node, "min_range", 0.0, "Min sensor range in meters");
-    RCLCPP_INFO(node->get_logger(),"  min_range: %f", min_range);
-
-    float max_range = param(node, "max_range", 40.0, "Max sensor range in meters");
-    RCLCPP_INFO(node->get_logger(),"  max_range: %f", max_range);
-
-    float rate = param(node, "rate", 20.0, "Publish rate");
-    RCLCPP_INFO(node->get_logger(),"  rate: %f", rate);
+    // dynamic parameters
+    double min_range, max_range;
+    params.register_param(&min_range, "min_range", 0.0, "Min sensor range in meters", 0.0, 10.0);
+    params.register_param(&max_range, "max_range", 40.0, "Max sensor range in meters", 1.0, 100.0);
 
     auto scan_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
 
