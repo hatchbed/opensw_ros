@@ -52,17 +52,18 @@ class RosLogSink : public spdlog::sinks::base_sink <Mutex>
     protected:
     void sink_it_(const spdlog::details::log_msg& msg) override
     {
+        static rcutils_log_location_t __log_loc = { msg.source.funcname, msg.source.filename, static_cast<size_t>(msg.source.line) };
         if (msg.level == spdlog::level::info) {
-            RCLCPP_INFO_STREAM(logger_, fmt::to_string(msg.payload));
+            rcutils_log(&__log_loc, RCUTILS_LOG_SEVERITY_INFO, logger_.get_name(), "%s", fmt::to_string(msg.payload).c_str());
         }
         else if (msg.level == spdlog::level::warn) {
-            RCLCPP_WARN_STREAM(logger_, fmt::to_string(msg.payload));
+            rcutils_log(&__log_loc, RCUTILS_LOG_SEVERITY_WARN, logger_.get_name(), "%s", fmt::to_string(msg.payload).c_str());
         }
         else if (msg.level == spdlog::level::err) {
-            RCLCPP_ERROR_STREAM(logger_, fmt::to_string(msg.payload));
+            rcutils_log(&__log_loc, RCUTILS_LOG_SEVERITY_ERROR, logger_.get_name(), "%s", fmt::to_string(msg.payload).c_str());
         }
         else {
-            RCLCPP_DEBUG_STREAM(logger_, fmt::to_string(msg.payload));
+            rcutils_log(&__log_loc, RCUTILS_LOG_SEVERITY_DEBUG, logger_.get_name(), "%s", fmt::to_string(msg.payload).c_str());
         }
     }
 
@@ -74,7 +75,7 @@ class RosLogSink : public spdlog::sinks::base_sink <Mutex>
 LogBridge::LogBridge(const std::string& name, rclcpp::Node::SharedPtr node) :
     node_(node)
 {
-    auto logger = node->get_logger().get_child(name);
+    auto logger = node->get_logger();//.get_child(name);
     full_name_ = logger.get_name();
 
     spdlog::sink_ptr ros_sink = std::make_shared<RosLogSink<std::mutex>>(logger);
@@ -84,14 +85,10 @@ LogBridge::LogBridge(const std::string& name, rclcpp::Node::SharedPtr node) :
     spdlog::set_pattern("%v");
 
     RCLCPP_INFO_STREAM(logger, "Initialized log bridge");
-    auto ret = rcutils_logging_set_logger_level(full_name_.c_str(), RCUTILS_LOG_SEVERITY_INFO);
-    if (ret != RCUTILS_RET_OK) {
-        RCLCPP_WARN_STREAM(logger, "Failed to set log level");
-    }
 
-    timer_ = node_->create_wall_timer(1000ms, [&]()
+    timer_ = node_->create_wall_timer(1000ms, [&, logger]()
     {
-        auto level = rcutils_logging_get_logger_level(full_name_.c_str());
+        auto level = rcutils_logging_get_logger_effective_level(full_name_.c_str());
         if (level != log_level_) {
             if (level == RCUTILS_LOG_SEVERITY_INFO) {
                 log_level_ = RCUTILS_LOG_SEVERITY_INFO;
