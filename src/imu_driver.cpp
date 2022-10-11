@@ -31,7 +31,7 @@
 
 #include <chrono>
 
-#include <param_util/param_handler.h>
+#include <hatchbed_common/param_handler.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rpad/client.h>
 #include <rpad_ros/logger.h>
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     RCLCPP_INFO(node->get_logger(),"Initializing rpad imu driver ...");
 
-    param_util::ParamHandler params(node);
+    hatchbed_common::ParamHandler params(node);
     params.register_verbose_logging_param();
 
     // sink log messages from rpad into roslogs
