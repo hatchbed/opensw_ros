@@ -33,24 +33,24 @@
 
 #include <hatchbed_common/param_handler.h>
 #include <rclcpp/rclcpp.hpp>
-#include <rpad/client.h>
-#include <rpad_ros/logger.h>
+#include <opensw/client.h>
+#include <opensw_ros/logger.h>
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 using namespace std::chrono_literals;
-using namespace rpad_ros;
+using namespace opensw_ros;
 
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<rclcpp::Node>("rpad_laser_driver");
-    RCLCPP_INFO(node->get_logger(), "Initializing rpad laser driver ...");
+    auto node = std::make_shared<rclcpp::Node>("opensw_laser_driver");
+    RCLCPP_INFO(node->get_logger(), "Initializing opensw laser driver ...");
 
     hatchbed_common::ParamHandler params(node);
     params.register_verbose_logging_param();
 
-    // sink log messages from rpad into roslogs
-    LogBridge log_bridge("rpad", node);
+    // sink log messages from opensw into roslogs
+    LogBridge log_bridge("opensw", node);
 
     // parameters
     std::string host = params.param("host", std::string("192.168.11.11"), "Host to connect to");
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     auto scan_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
 
-    rpad::Client client;
+    opensw::Client client;
 
     rclcpp::Time last_stamp = node->now();
     rclcpp::Rate spin_rate(rate);

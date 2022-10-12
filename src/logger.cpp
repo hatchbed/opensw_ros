@@ -29,19 +29,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <rpad_ros/logger.h>
+#include <opensw_ros/logger.h>
 
 #include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <rpad/logger.h>
+#include <opensw/logger.h>
 
 using namespace std::chrono_literals;
 
 namespace spd = spdlog;
 
-namespace rpad_ros {
+namespace opensw_ros {
 
 template<typename Mutex>
 class RosLogSink : public spdlog::sinks::base_sink <Mutex>
@@ -114,4 +114,4 @@ LogBridge::LogBridge(const std::string& name, rclcpp::Node::SharedPtr node) :
     });
 }
 
-}  // namespace rpad_ros
+}  // namespace opensw_ros
