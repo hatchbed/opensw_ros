@@ -34,7 +34,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rcutils/logging.h>
 
-namespace rpad_ros {
+namespace opensw_ros {
 
 class LogBridge {
 
@@ -48,4 +48,4 @@ class LogBridge {
     RCUTILS_LOG_SEVERITY log_level_ = RCUTILS_LOG_SEVERITY_INFO;
 };
 
-}  // namespace rpad_ros
+}  // namespace opensw_ros

@@ -33,25 +33,25 @@
 
 #include <hatchbed_common/param_handler.h>
 #include <rclcpp/rclcpp.hpp>
-#include <rpad/client.h>
-#include <rpad_ros/logger.h>
+#include <opensw/client.h>
+#include <opensw_ros/logger.h>
 #include <sensor_msgs/msg/imu.hpp>
 
 using namespace std::chrono_literals;
-using namespace rpad_ros;
+using namespace opensw_ros;
 
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<rclcpp::Node>("rpad_imu_driver");
+    auto node = std::make_shared<rclcpp::Node>("opensw_imu_driver");
 
-    RCLCPP_INFO(node->get_logger(),"Initializing rpad imu driver ...");
+    RCLCPP_INFO(node->get_logger(),"Initializing opensw imu driver ...");
 
     hatchbed_common::ParamHandler params(node);
     params.register_verbose_logging_param();
 
-    // sink log messages from rpad into roslogs
-    LogBridge log_bridge("rpad", node);
+    // sink log messages from opensw into roslogs
+    LogBridge log_bridge("opensw", node);
 
     // parameters
     std::string host = params.param("host", std::string("192.168.11.11"), "Host to connect to");
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
     auto imu_pub = node->create_publisher<sensor_msgs::msg::Imu>("imu", rclcpp::SensorDataQoS());
 
-    rpad::Client client;
+    opensw::Client client;
 
     rclcpp::Time last_stamp = node->now();
     rclcpp::Rate spin_rate(rate);
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
             }
         }
 
-        std::optional<rpad::ImuData> imu_data;
+        std::optional<opensw::ImuData> imu_data;
         if (use_raw_data) {
             imu_data = client.getRawImuData();
         }
