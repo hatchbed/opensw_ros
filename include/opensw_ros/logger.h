@@ -33,7 +33,7 @@
 
 #include <ros/ros.h>
 
-namespace rpad_ros {
+namespace opensw_ros {
 
 class LogBridge {
 
@@ -50,4 +50,4 @@ class LogBridge {
     ros::console::levels::Level log_level_ = ros::console::levels::Info;
 };
 
-}  // namespace rpad_ros
+}  // namespace opensw_ros
