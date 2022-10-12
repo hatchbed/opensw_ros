@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>rpad_ros</name>
+  <name>opensw_ros</name>
   <version>0.1.0</version>
   <description>Open driver communicating with SlamTec rpos framework devices such as the M2M1 mapper.</description>
 
@@ -9,7 +9,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rpad</depend>
+  <depend>opensw</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
 </package>

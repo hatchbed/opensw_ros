@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <rpad_ros/logger.h>
+#include <opensw_ros/logger.h>
 
 #include <map>
 #include <memory>
@@ -37,11 +37,11 @@
 
 #include <ros/ros.h>
 
-#include <rpad/logger.h>
+#include <opensw/logger.h>
 
 namespace spd = spdlog;
 
-namespace rpad_ros {
+namespace opensw_ros {
 
 template<typename Mutex>
 class RosLogSink : public spdlog::sinks::base_sink <Mutex>
@@ -73,7 +73,7 @@ class RosLogSink : public spdlog::sinks::base_sink <Mutex>
 
 LogBridge::LogBridge(const std::string& name, const ros::NodeHandle& node) :
     name_(name),
-    full_name_("ros.rpad_ros." + name_),
+    full_name_("ros.opensw_ros." + name_),
     node_(node)
 {
     spdlog::sink_ptr ros_sink = std::make_shared<RosLogSink<std::mutex>>(name_);
@@ -112,4 +112,4 @@ void LogBridge::checkLogLevel(const ros::WallTimerEvent& e) {
     }
 }
 
-}  // namespace rpad_ros
+}  // namespace opensw_ros

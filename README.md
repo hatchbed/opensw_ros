@@ -1,4 +1,4 @@
-# rpad_ros
+# opensw_ros
 Open ROS driver for communicating with SlamTec Slamware devices such as the
 [M2M1 Mapper](https://www.slamtec.com/en/Lidar/Mapper) over ethernet.  Other
 SlamTec devices based on SlamWare may also be supported.  For standalone lidar

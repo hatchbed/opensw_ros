@@ -29,20 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <rpad/client.h>
-#include <rpad_ros/logger.h>
+#include <opensw/client.h>
+#include <opensw_ros/logger.h>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "rpad_laser_driver");
+    ros::init(argc, argv, "opensw_laser_driver");
     ros::NodeHandle node;
     ros::NodeHandle priv("~");
 
-    rpad_ros::LogBridge log_bridge("rpad", node);
+    opensw_ros::LogBridge log_bridge("opensw", node);
 
-    ROS_INFO("Initializing rpad laser driver ...");
+    ROS_INFO("Initializing opensw laser driver ...");
 
     std::string host = priv.param("host", std::string("192.168.11.11"));
     ROS_INFO("  host: %s", host.c_str());
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
     ros::Publisher scan_pub = node.advertise<sensor_msgs::LaserScan>("scan", 10);
 
-    rpad::Client client;
+    opensw::Client client;
 
     ros::Time last_stamp = ros::Time::now();
     ros::Rate spin_rate(rate);
